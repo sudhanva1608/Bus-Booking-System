@@ -6,218 +6,153 @@ public class BusDemo {
     static Scanner sc = new Scanner(System.in);
 
     public static void main(String[] args) throws Exception {
+        Bus[] buses = new Bus[10];
+        Booking[] bookings = new Booking[50];
+        int busCount = 0, bookingCount = 0;
 
-        Bus[] buses = new Bus[10];          // array of buses
-        Booking[] bookings = new Booking[50]; // array of bookings
-
-        int busCount = 0;
-        int bookingCount = 0;
-
-        // default buses
         buses[busCount++] = new Bus(1, true, 2, "Bangalore → Mysore", 150, 5);
         buses[busCount++] = new Bus(2, false, 3, "Bangalore → Chennai", 330, 4);
         buses[busCount++] = new Bus(3, true, 1, "Mangalore → Bangalore", 350, 6);
 
         int choice;
         do {
-            System.out.println("\n====== 🚌 BUS BOOKING SYSTEM ======");
-            System.out.println("1. View Available Buses");
+            System.out.println("\n====== BUS BOOKING SYSTEM ======");
+            System.out.println("1. View Buses");
             System.out.println("2. Book Ticket");
-            System.out.println("3. View All Bookings");
+            System.out.println("3. View Bookings");
             System.out.println("4. Admin Panel");
             System.out.println("5. Exit");
-            System.out.print("Enter your choice: ");
+            System.out.print("Enter choice: ");
             choice = sc.nextInt();
 
-            switch (choice) {
-                case 1:
-                    showBuses(buses, busCount);
-                    break;
-                case 2:
-                    bookingCount = handleBooking(buses, bookings, busCount, bookingCount);
-                    break;
-                case 3:
-                    showBookings(bookings, bookingCount);
-                    break;
-                case 4:
-                    busCount = adminPanel(buses, busCount);
-                    break;
-                case 5:
-                    System.out.println("Thank you for using Bus Booking System!");
-                    break;
-                default:
-                    System.out.println("❌ Invalid choice, try again.");
-            }
-
+            if (choice == 1) showBuses(buses, busCount);
+            else if (choice == 2) bookingCount = handleBooking(buses, bookings, busCount, bookingCount);
+            else if (choice == 3) showBookings(bookings, bookingCount);
+            else if (choice == 4) busCount = adminPanel(buses, busCount);
+            else if (choice == 5) System.out.println("Thank you for using Bus Booking System!");
+            else System.out.println("Invalid choice.");
         } while (choice != 5);
 
         sc.close();
     }
 
-    // ---------------- USER: View Buses ----------------
-    public static void showBuses(Bus[] buses, int busCount) {
-        System.out.println("\n------ AVAILABLE BUSES ------");
-        for (int i = 0; i < busCount; i++) {
-            buses[i].displayBusInfo();
+    static void showBuses(Bus[] buses, int busCount) {
+        if (busCount == 0) {
+            System.out.println("No buses available.");
+            return;
         }
+        System.out.println("\n------ AVAILABLE BUSES ------");
+        for (int i = 0; i < busCount; i++) buses[i].displayBusInfo();
         System.out.println("-----------------------------");
     }
 
-    // ---------------- USER: Book Ticket ----------------
-    public static int handleBooking(Bus[] buses, Booking[] bookings,
-                                    int busCount, int bookingCount) throws Exception {
+    static int handleBooking(Bus[] buses, Booking[] bookings, int busCount, int bookingCount) throws Exception {
         if (busCount == 0) {
-            System.out.println("No buses available!");
+            System.out.println("No buses to book.");
             return bookingCount;
         }
-
         showBuses(buses, busCount);
-
         System.out.print("\nEnter Passenger Name: ");
         String name = sc.next();
-
-        System.out.print("Enter Bus No to book: ");
+        System.out.print("Enter Bus No: ");
         int busNo = sc.nextInt();
-
         Bus selectedBus = findBus(buses, busCount, busNo);
         if (selectedBus == null) {
-            System.out.println("❌ Bus not found!");
+            System.out.println("Bus not found.");
             return bookingCount;
         }
-
         if (selectedBus.getCapacity() <= 0) {
-            System.out.println("❌ Sorry! No seats available on this bus.");
+            System.out.println("No seats available.");
             return bookingCount;
         }
-
         System.out.print("Enter Journey Date (dd-MM-yyyy): ");
-        String dateStr = sc.next();
-        Date date = new SimpleDateFormat("dd-MM-yyyy").parse(dateStr);
-
-        // Book seat on bus
-        boolean seatBooked = selectedBus.bookSeat();
-        if (!seatBooked) {
-            System.out.println("❌ Seat booking failed, please try again.");
+        Date date = new SimpleDateFormat("dd-MM-yyyy").parse(sc.next());
+        if (!selectedBus.bookSeat()) {
+            System.out.println("Seat booking failed.");
             return bookingCount;
         }
-
-        // Create Booking object (Inheritance in action)
         Booking booking = new Booking(name, date, selectedBus);
-
         bookings[bookingCount++] = booking;
-
-        System.out.println("✅ Booking Successful!");
+        System.out.println("Booking Successful!");
         booking.displayBookingDetails();
-
         return bookingCount;
     }
 
-    // --------------- USER: View All Bookings ---------------
-    public static void showBookings(Booking[] bookings, int bookingCount) {
+    static void showBookings(Booking[] bookings, int bookingCount) {
         if (bookingCount == 0) {
-            System.out.println("\nNo bookings done yet.");
+            System.out.println("No bookings yet.");
             return;
         }
-
         System.out.println("\n====== ALL BOOKINGS ======");
-        for (int i = 0; i < bookingCount; i++) {
-            bookings[i].displayBookingDetails();
-        }
+        for (int i = 0; i < bookingCount; i++) bookings[i].displayBookingDetails();
     }
 
-    // --------------- ADMIN PANEL ----------------
-    public static int adminPanel(Bus[] buses, int busCount) {
-        System.out.print("\nEnter admin username: ");
+    static int adminPanel(Bus[] buses, int busCount) {
+        System.out.print("\nAdmin username: ");
         String user = sc.next();
-        System.out.print("Enter admin password: ");
+        System.out.print("Admin password: ");
         String pass = sc.next();
-
         if (!user.equals("admin") || !pass.equals("1234")) {
-            System.out.println("❌ Invalid admin credentials!");
+            System.out.println("Invalid credentials.");
             return busCount;
         }
-
-        int opt;
+        int c;
         do {
-            System.out.println("\n====== 🔐 ADMIN PANEL ======");
-            System.out.println("1. Add New Bus");
-            System.out.println("2. Update Bus Capacity");
+            System.out.println("\n====== ADMIN PANEL ======");
+            System.out.println("1. Add Bus");
+            System.out.println("2. Update Capacity");
             System.out.println("3. View Buses");
             System.out.println("4. Logout");
-            System.out.print("Enter your choice: ");
-            opt = sc.nextInt();
-
-            switch (opt) {
-                case 1:
-                    busCount = addBus(buses, busCount);
-                    break;
-                case 2:
-                    updateCapacity(buses, busCount);
-                    break;
-                case 3:
-                    showBuses(buses, busCount);
-                    break;
-                case 4:
-                    System.out.println("Admin logged out.");
-                    break;
-                default:
-                    System.out.println("❌ Invalid choice.");
-            }
-
-        } while (opt != 4);
-
+            System.out.print("Enter choice: ");
+            c = sc.nextInt();
+            if (c == 1) busCount = addBus(buses, busCount);
+            else if (c == 2) updateCapacity(buses, busCount);
+            else if (c == 3) showBuses(buses, busCount);
+            else if (c == 4) System.out.println("Logged out.");
+            else System.out.println("Invalid choice.");
+        } while (c != 4);
         return busCount;
     }
 
-    public static int addBus(Bus[] buses, int busCount) {
+    static int addBus(Bus[] buses, int busCount) {
         if (busCount >= buses.length) {
-            System.out.println("❌ Cannot add more buses. Limit reached.");
+            System.out.println("Bus limit reached.");
             return busCount;
         }
-
         System.out.print("Enter Bus No: ");
         int no = sc.nextInt();
-        System.out.print("Is AC bus? (true/false): ");
+        System.out.print("Is AC (true/false): ");
         boolean ac = sc.nextBoolean();
         System.out.print("Enter Capacity: ");
         int cap = sc.nextInt();
-        sc.nextLine(); // consume newline
+        sc.nextLine();
         System.out.print("Enter Route: ");
         String route = sc.nextLine();
         System.out.print("Enter Distance (km): ");
         double dist = sc.nextDouble();
-        System.out.print("Enter Base Fare per km: ");
+        System.out.print("Enter Base Fare/km: ");
         double fare = sc.nextDouble();
-
         buses[busCount++] = new Bus(no, ac, cap, route, dist, fare);
-        System.out.println("✅ Bus added successfully!");
-
+        System.out.println("Bus added.");
         return busCount;
     }
 
-    public static void updateCapacity(Bus[] buses, int busCount) {
-        System.out.print("Enter Bus No to update: ");
+    static void updateCapacity(Bus[] buses, int busCount) {
+        System.out.print("Enter Bus No: ");
         int no = sc.nextInt();
-
         Bus bus = findBus(buses, busCount, no);
         if (bus == null) {
-            System.out.println("❌ Bus not found!");
+            System.out.println("Bus not found.");
             return;
         }
-
         System.out.print("Enter new capacity: ");
-        int newCap = sc.nextInt();
-        bus.setCapacity(newCap);
-        System.out.println("✅ Capacity updated!");
+        bus.setCapacity(sc.nextInt());
+        System.out.println("Capacity updated.");
     }
 
-    // Utility: Find bus by number
-    public static Bus findBus(Bus[] buses, int busCount, int busNo) {
-        for (int i = 0; i < busCount; i++) {
-            if (buses[i].getBusNo() == busNo) {
-                return buses[i];
-            }
-        }
+    static Bus findBus(Bus[] buses, int busCount, int busNo) {
+        for (int i = 0; i < busCount; i++)
+            if (buses[i].getBusNo() == busNo) return buses[i];
         return null;
     }
 }
