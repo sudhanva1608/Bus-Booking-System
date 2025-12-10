@@ -1,13 +1,13 @@
-import java.util.*;
-
 public class Bus {
+    // Encapsulation: private data members
     private int busNo;
     private boolean ac;
-    private int capacity;
+    private int capacity;      // available seats
     private String route;
-    private double distance; // in kilometers
-    private double baseFare; // per km rate
+    private double distance;   // in km
+    private double baseFare;   // fare per km
 
+    // Constructor
     public Bus(int busNo, boolean ac, int capacity, String route, double distance, double baseFare) {
         this.busNo = busNo;
         this.ac = ac;
@@ -17,6 +17,7 @@ public class Bus {
         this.baseFare = baseFare;
     }
 
+    // Getters and Setters
     public int getBusNo() {
         return busNo;
     }
@@ -41,20 +42,35 @@ public class Bus {
         return baseFare;
     }
 
-    public void reduceCapacity() {
-        this.capacity--;
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
     }
 
-    public void setCapacity(int newCapacity) {
-        this.capacity = newCapacity;
+    // Business logic: booking seat
+    public boolean bookSeat() {
+        if (capacity > 0) {
+            capacity--;
+            return true;
+        }
+        return false;
     }
 
+    // Fare calculation (can be reused by child class)
+    public double calculateFare() {
+        double fare = distance * baseFare;
+        if (ac) {
+            fare = fare * 1.2; // 20% extra for AC
+        }
+        return fare;
+    }
+
+    // Display bus details
     public void displayBusInfo() {
-        System.out.println("Bus No: " + busNo + 
-                           " | AC: " + (ac ? "Yes" : "No") +
-                           " | Seats: " + capacity +
-                           " | Route: " + route +
-                           " | Distance: " + distance + " km" +
-                           " | Fare/km: ₹" + baseFare);
+        System.out.println("Bus No: " + busNo
+                + " | AC: " + (ac ? "Yes" : "No")
+                + " | Seats Available: " + capacity
+                + " | Route: " + route
+                + " | Distance: " + distance + " km"
+                + " | Base Fare/km: ₹" + baseFare);
     }
 }
