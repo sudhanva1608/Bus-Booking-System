@@ -1,53 +1,53 @@
-import java.text.*;
-import java.util.*;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 
-public class Booking {
+public class Booking extends Bus {
     private String passengerName;
-    private int busNo;
-    private Date date;
-    private double fareAmount;
+    private Date journeyDate;
+    private double finalFare;
 
-    public Booking(String passengerName, int busNo, Date date) {
+    // Constructor chaining with super()
+    public Booking(String passengerName, Date journeyDate, Bus bus) {
+        // Call parent constructor to copy bus details
+        super(bus.getBusNo(), bus.isAc(), bus.getCapacity(), bus.getRoute(),
+              bus.getDistance(), bus.getBaseFare());
         this.passengerName = passengerName;
-        this.busNo = busNo;
-        this.date = date;
+        this.journeyDate = journeyDate;
+
+        // Polymorphism: overridden method is called
+        this.finalFare = calculateFare();
     }
 
-    public boolean isAvailable(ArrayList<Booking> bookings, ArrayList<Bus> buses) {
-        int capacity = 0;
-        for (Bus b : buses) {
-            if (b.getBusNo() == busNo)
-                capacity = b.getCapacity();
-        }
-
-        int booked = 0;
-        for (Booking b : bookings) {
-            if (b.busNo == busNo && b.date.equals(date))
-                booked++;
-        }
-
-        return booked < capacity;
+    public String getPassengerName() {
+        return passengerName;
     }
 
-    public double calculateFare(Bus bus) {
-        double fare = bus.getDistance() * bus.getBaseFare();
-        if (bus.isAc()) {
-            fare *= 1.2; // 20% extra for AC
-        }
-        return fare;
+    public Date getJourneyDate() {
+        return journeyDate;
     }
 
-    public void confirmBooking(ArrayList<Booking> bookings, ArrayList<Bus> buses) {
-        for (Bus b : buses) {
-            if (b.getBusNo() == busNo) {
-                b.reduceCapacity();
-                fareAmount = calculateFare(b);
-                break;
-            }
-        }
-        bookings.add(this);
-        System.out.println("✅ Booking Confirmed for " + passengerName + " on Bus " + busNo + " for " + date);
-        System.out.println("💰 Fare Amount: ₹" + fareAmount);
+    public double getFinalFare() {
+        return finalFare;
+    }
+
+    // Method Overriding (Polymorphism):
+    // Adds small service charge on top of normal bus fare.
+    @Override
+    public double calculateFare() {
+        double baseFare = super.calculateFare(); // call parent's logic
+        double serviceCharge = 20.0;             // flat service charge
+        return baseFare + serviceCharge;
+    }
+
+    public void displayBookingDetails() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        System.out.println("\n----- TICKET DETAILS -----");
+        System.out.println("Passenger Name : " + passengerName);
+        System.out.println("Bus No         : " + getBusNo());
+        System.out.println("Route          : " + getRoute());
+        System.out.println("Journey Date   : " + sdf.format(journeyDate));
+        System.out.println("AC             : " + (isAc() ? "Yes" : "No"));
+        System.out.println("Fare Paid      : ₹" + finalFare);
+        System.out.println("--------------------------");
     }
 }
-
